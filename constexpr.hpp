@@ -1,3 +1,6 @@
+#ifndef CONSTEXPR_HPP
+#define CONSTEXPR_HPP
+
 #include <cstdio>
 #include <array>
 
@@ -174,3 +177,5 @@ print_array(const char * name, const unsigned char * array, int length)
 constexpr std::array<unsigned char,     NX * NY> distctr     = generate_distctr    ();
 constexpr std::array<unsigned char,     NX * NY> invdistctr  = generate_invdistctr ();
 constexpr std::array<unsigned char, 4 * NX * NY> distcornerr = generate_distcorners();
+
+#endif // CONSTEXPR_HPP
