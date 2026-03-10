@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 CFLAGS=$(shell pkg-config --cflags --libs gtk+-3.0)
 
 all: simfibre
