@@ -13,8 +13,7 @@ uint8_t justswitchedeffect = 1;
 
 uint32_t mrand = 0xcafebabe;
 
-static inline uint32_t xorshift32()
-{
+static inline uint32_t xorshift32(){
   /* Algorithm "xor" from p. 4 of Marsaglia, "Xorshift RNGs" */
   uint32_t x = mrand;
   x ^= x << 13;
@@ -25,7 +24,7 @@ static inline uint32_t xorshift32()
 }
 
 // Callback function to handle the "destroy" signal
-void on_destroy(GtkWidget *widget, gpointer data) {
+void on_destroy(GtkWidget *widget, gpointer data){
   free(titlestr);
   gtk_main_quit();
 }
