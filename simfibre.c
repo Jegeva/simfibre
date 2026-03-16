@@ -6,7 +6,6 @@
 #include "fast_hsv2rgb.h"
 
 #include "effects.h"
-#include "constexpr.hpp"
 
 char * titlestr;
 
