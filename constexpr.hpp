@@ -14,9 +14,9 @@ constexpr int NX = LEDNUMX;
 constexpr int NY = LEDNUMY;
 
 namespace lut {
-	typedef std::array<unsigned char,     NX     * NY>  array_1D;
-	typedef std::array<unsigned char, 2 * NX * 2 * NY>  array_2D;
-	typedef std::array<unsigned char, 4 * NX * 4 * NY>  array_3D;
+	typedef std::array<unsigned char,     NX     * NY>  array_2D;
+	typedef std::array<unsigned char, 2 * NX * 2 * NY>  array_3D;
+	typedef std::array<unsigned char, 4 * NX * 4 * NY>  array_4D;
 }
 
 //////////////////////////////////////////////////
@@ -56,9 +56,9 @@ constexpr double dist_corner(double y, double x) {
 //////////////////////////////////////////////////
 // CONSTEXPR LUT GENERATION FUNCTIONS			//
 //////////////////////////////////////////////////
-constexpr lut::array_1D generate_distctr() {
+constexpr lut::array_2D generate_distctr() {
 
-	lut::array_1D arr {};	
+	lut::array_2D arr {};	
 	
 	double mapMax = dist_center(0, 0, CENTER_Y, CENTER_X);
 	for(int y = 0; y < NY; y++) {
@@ -69,9 +69,9 @@ constexpr lut::array_1D generate_distctr() {
 	return arr;
 }
 
-constexpr lut::array_3D generate_distqctr() {	
+constexpr lut::array_4D generate_distqctr() {	
 
-	lut::array_3D arr {};
+	lut::array_4D arr {};
 		
 	double centerQ[2] = { (4.0*NY-1.0)/2.0, (4.0*NX-1.0)/2.0 };
 	double mapMax = dist_center(0, 0, centerQ[0], centerQ[1]);	
@@ -83,9 +83,9 @@ constexpr lut::array_3D generate_distqctr() {
 	return arr;
 }
 
-constexpr lut::array_1D generate_invdistctr(lut::array_1D distctr) {
+constexpr lut::array_2D generate_invdistctr(lut::array_2D distctr) {
 
-	lut::array_1D arr {};
+	lut::array_2D arr {};
 	for(int y = 0; y < NY; ++y) {
 		for(int x = 0; x < NX; ++x) {
 			arr[y*NX + x] = 255.0 - distctr[y*NX + x];
@@ -94,9 +94,9 @@ constexpr lut::array_1D generate_invdistctr(lut::array_1D distctr) {
 	return arr;
 }
 
-constexpr lut::array_2D generate_distcorners() {
+constexpr lut::array_3D generate_distcorners() {
 
-	lut::array_2D arr {};
+	lut::array_3D arr {};
 	double mapMax = std::floor(dist_corner(NY,NX));
 	for(int y = 0; y < NY; y++) {
 		for(int x = 0; x < NX; x++) {
@@ -114,9 +114,9 @@ constexpr lut::array_2D generate_distcorners() {
 void print_constexpr_LUT(const char * name, const unsigned char * array, int length, int sizeX, int sizeY);
 
 // GENERATE THE LUTS
-constexpr lut::array_1D distctr     = generate_distctr    ();
-constexpr lut::array_1D invdistctr  = generate_invdistctr ( distctr );
-constexpr lut::array_2D distcornerr = generate_distcorners();
-constexpr lut::array_3D distQuadctr = generate_distqctr   ();
+constexpr lut::array_2D distctr     = generate_distctr    ();
+constexpr lut::array_2D invdistctr  = generate_invdistctr ( distctr );
+constexpr lut::array_3D distcornerr = generate_distcorners();
+constexpr lut::array_4D distQuadctr = generate_distqctr   ();
 
 #endif // CONSTEXPR_HPP
