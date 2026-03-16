@@ -53,7 +53,7 @@ constexpr double CENTER_Y = (NY - 1.0) / 2.0;
 constexpr double 
 dist_center(double y, double x, double centerY, double centerX)
 {
-	return std::floor(std::sqrt( sqr(std::abs(y-centerY)) + sqr(std::abs(x-centerY)) ));
+	return std::floor(std::sqrt( sqr(abs(y-centerY)) + sqr(abs(x-centerY)) ));
 }
 
 constexpr double 
