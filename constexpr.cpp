@@ -3,21 +3,16 @@
 #include "constexpr.hpp"
 
 // simple print function to print contents of generated LUTs
-void 
-print_constexpr_LUT(const char * name, const unsigned char * array, int length, int sizeX, int sizeY)
-{
+void print_constexpr_LUT(const char * name, const unsigned char * array, int length, int sizeX, int sizeY) {
 	printf("array: %s\n", name);
 	int y = 0;
-	for(int i = 0; i < length; i++)
-	{
+	for(int i = 0; i < length; i++) {
 		printf("%3u ", array[i]);
-		if(!((i + 1) % sizeX))
-		{
+		if(!((i + 1) % sizeX)) {
 			printf("\n");
 			y++;
 		}
-		if(y == sizeY)
-		{
+		if(y == sizeY) {
 			printf("\n");
 			y = 0;
 		}
