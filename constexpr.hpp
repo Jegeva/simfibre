@@ -1,55 +1,25 @@
 #ifndef CONSTEXPR_HPP
 #define CONSTEXPR_HPP
 
-#include <cstdio>
 #include <array>
+#include <cmath>
 
+#include "simfibre_config.h"
 #include "sluts.h"
 
 //////////////////////////////////////////////////
 // SIZE OF ARRAY BLOCKS							//
 //////////////////////////////////////////////////
-constexpr int NX = 12;
-constexpr int NY = 12;
+constexpr int NX = LEDNUMX;
+constexpr int NY = LEDNUMY;
 
 //////////////////////////////////////////////////
 // MATH FUNCTIONS								//
 //////////////////////////////////////////////////
-constexpr int PI = 3.14159265358979323846;
-
-constexpr int
-abs(int x)
-{
-	return (x < 0) ? -x : x;
-}
-
-constexpr int
-sqr(int x)
-{
-	return x * x;
-}
-
 constexpr int
 clamp(int v, int min, int max)
 {
 	return (v < min) ? min : (v > max) ? max : v;
-}
-
-// sqrt via 5 Newton iterations
-constexpr double
-sqrt(unsigned int x)
-{
-	// prevent division by zero
-	if(x == 0)
-	{
-		return 0;
-	}	
-	double g = x;	
-	for(int i = 0; i < 5; ++i)
-	{
-		g = (g + x / g) / 2;
-	}
-	return g;
 }
 
 constexpr double
@@ -68,38 +38,28 @@ tan(int angle)
 	return TAN_LUT[angle];
 }
 
+constexpr double
+sqr(double x)
+{
+	return x*x;
+}
+
 //////////////////////////////////////////////////
 // LUT PATTERN FUNCTIONS						//
 //////////////////////////////////////////////////
-constexpr int CENTER_X = (NX - 1) / 2;
-constexpr int CENTER_Y = (NY - 1) / 2;
+constexpr double CENTER_X = (NX - 1.0) / 2.0;
+constexpr double CENTER_Y = (NY - 1.0) / 2.0;
 
-constexpr unsigned char 
-dist_center(int x, int y)
+constexpr double 
+dist_center(double y, double x, double centerY, double centerX)
 {
-	int dx = x - CENTER_X;
-	int dy = y - CENTER_Y;
-	unsigned int v = static_cast<unsigned int>(dx*dx + dy*dy);
-	return static_cast<unsigned char>(sqrt(v));
+	return std::floor(std::sqrt( sqr(std::abs(y-centerY)) + sqr(std::abs(x-centerY)) ));
 }
 
-constexpr unsigned char 
-inv_dist_center(int x, int y)
+constexpr double 
+dist_corner(double y, double x)
 {
-	int d = static_cast<int>(dist_center(x, y));
-	int v = 7 - d;
-	if(v < 0)
-	{
-		return static_cast<unsigned char>(0);
-	}
-	return static_cast<unsigned char>(v);
-}
-
-constexpr unsigned char 
-dist_corner(int x, int y)
-{
-	unsigned int v = static_cast<unsigned int>(x*x + y*y);
-	return static_cast<unsigned char>(sqrt(v));
+	return std::sqrt( sqr(abs(y)) + sqr(abs(x)) );
 }
 
 //////////////////////////////////////////////////
@@ -108,26 +68,45 @@ dist_corner(int x, int y)
 constexpr std::array<unsigned char, NX * NY> 
 generate_distctr()
 {
-	std::array<unsigned char, NX * NY> arr {};
-	for(int y = 0; y < NY; ++y)
+	std::array<unsigned char, NX * NY> arr {};	
+	
+	double mapMax = dist_center(0, 0, CENTER_Y, CENTER_X);
+	for(int y = 0; y < NY; y++)
 	{
-		for(int x = 0; x < NX; ++x)
+		for(int x = 0; x < NX; x++)
 		{
-			arr[y * NX + x] = dist_center(x, y);
+			arr[y*NX + x] = dist_center(y, x, CENTER_Y, CENTER_X) * (255.0/mapMax);
+		}
+	}
+	return arr;
+}
+
+constexpr std::array<unsigned char, 16 * NX * NY> 
+generate_distqctr()
+{	
+	std::array<unsigned char, 16 * NX * NY> arr {};
+		
+	double centerQ[2] = { (4.0*NY-1.0)/2.0, (4.0*NX-1.0)/2.0 };
+	double mapMax = dist_center(0, 0, centerQ[0], centerQ[1]);	
+	for(int y = 0; y < (NY*4); y++)
+	{
+		for(int x = 0; x < (NX*4); x++)
+		{
+			arr[y*(NX*4) + x] = dist_center(y, x, centerQ[0], centerQ[1]) * (255.0/mapMax);
 		}
 	}
 	return arr;
 }
 
 constexpr std::array<unsigned char, NX * NY> 
-generate_invdistctr()
+generate_invdistctr(std::array<unsigned char, NX * NY> distctr)
 {
 	std::array<unsigned char, NX * NY> arr {};
 	for(int y = 0; y < NY; ++y)
 	{
 		for(int x = 0; x < NX; ++x)
 		{
-			arr[y*NX + x] = inv_dist_center(x, y);
+			arr[y*NX + x] = 255.0 - distctr[y*NX + x];
 		}
 	}
 	return arr;
@@ -135,47 +114,31 @@ generate_invdistctr()
 
 constexpr std::array<unsigned char, 4 * NX * NY> 
 generate_distcorners()
-{
+{	
 	std::array<unsigned char, 4 * NX * NY> arr {};
+	
+	double mapMax = std::floor(dist_corner(NY,NX));
 	for(int y = 0; y < NY; ++y)
 	{
 		for(int x = 0; x < NX; ++x)
 		{
-			int base = y * NX + x;
-			arr[0 * NX * NY + base] = dist_corner(           x,            y);
-			arr[1 * NX * NY + base] = dist_corner((NX - 1) - x,            y);
-			arr[2 * NX * NY + base] = dist_corner((NX - 1) - x, (NY - 1) - y);
-			arr[3 * NX * NY + base] = dist_corner(           x, (NY - 1) - y);
+			int offset = y * NX + x;
+			arr[0 * NX * NY + offset] = std::ceil(dist_corner(            y,            x)) * 255.0/mapMax;
+			arr[1 * NX * NY + offset] = std::ceil(dist_corner(            y, (NX - 1) - x)) * 255.0/mapMax;
+			arr[2 * NX * NY + offset] = std::ceil(dist_corner( (NY - 1) - y, (NX - 1) - x)) * 255.0/mapMax;
+			arr[3 * NX * NY + offset] = std::ceil(dist_corner( (NY - 1) - y,            x)) * 255.0/mapMax;
 		}
 	}
    return arr;
 }
 
 // simple print function to print contents of generated LUTs
-void 
-print_array(const char * name, const unsigned char * array, int length)
-{
-	printf("array: %s\n", name);
-	int y = 0;
-	for(int i = 0; i < length; i++)
-	{
-		printf("%2u ", array[i]);
-		if(!((i + 1) % NX))
-		{
-			printf("\n");
-			y++;
-		}
-		if(y == NY)
-		{
-			printf("\n");
-			y = 0;
-		}
-	}
-}
+void print_constexpr_LUT(const char * name, const unsigned char * array, int length, int sizeX, int sizeY);
 
 // GENERATE THE LUTS
 constexpr std::array<unsigned char,     NX * NY> distctr     = generate_distctr    ();
-constexpr std::array<unsigned char,     NX * NY> invdistctr  = generate_invdistctr ();
+constexpr std::array<unsigned char,     NX * NY> invdistctr  = generate_invdistctr ( distctr );
 constexpr std::array<unsigned char, 4 * NX * NY> distcornerr = generate_distcorners();
+constexpr std::array<unsigned char, 16* NX * NY> distQuadctr = generate_distqctr   ();
 
 #endif // CONSTEXPR_HPP

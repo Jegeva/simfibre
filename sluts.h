@@ -1,4 +1,6 @@
-// SIN and COS LUT
+// SIN, COS AND TAN LUTs
+// These sLUTs are filled with sin and great tanlines, 'cos we 
+// don't want to have to calculate their values during runtime.
 
 // C++ constexpr expressions need constexpr food
 #if defined (__cplusplus)

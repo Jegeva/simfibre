@@ -1,5 +1,5 @@
 #include "effects.h"
-#include "maps.h"
+#include "constexpr.hpp"
 
 uint16_t recthues[LEDNUMX*LEDNUMY];
 uint16_t rectsat[LEDNUMX*LEDNUMY];

@@ -6,19 +6,15 @@
 #include "fast_hsv2rgb.h"
 
 #include "effects.h"
+#include "constexpr.hpp"
 
 char * titlestr;
-
-
-
 
 // Callback function to handle the "destroy" signal
 void on_destroy(GtkWidget *widget, gpointer data){
   free(titlestr);
   gtk_main_quit();
 }
-
-
 
 GdkRGBA  rectcols[LEDNUMX*LEDNUMY];
 GdkRectangle * rects[LEDNUMX*LEDNUMY];
@@ -91,7 +87,7 @@ int main(int argc, char *argv[]){
     //xorshift32();
     for(int i=0;i<LEDNUMX;i++){
       for(int j=0;j<LEDNUMY;j++){
-	rects[i+LEDNUMX*j] = (GdkRectangle*) malloc(sizeof(GdkRectangle));
+			rects[i+LEDNUMX*j] = (GdkRectangle*) malloc(sizeof(GdkRectangle));
 		if((j&1) == 0){
 			rects[i+LEDNUMX*j]->x = i*LEDPIXSZ;
 		}
