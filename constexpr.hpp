@@ -14,9 +14,9 @@ constexpr int NX = LEDNUMX;
 constexpr int NY = LEDNUMY;
 
 namespace lut {
-	typedef std::array<unsigned char,     NX     * NY>  array_2D;
-	typedef std::array<unsigned char, 2 * NX * 2 * NY>  array_3D;
-	typedef std::array<unsigned char, 4 * NX * 4 * NY>  array_4D;
+	typedef std::array<unsigned char,     NX     * NY> array_2D;
+	typedef std::array<unsigned char, 2 * NX * 2 * NY> array_3D;
+	typedef std::array<unsigned char, 4 * NX * 4 * NY> array_4D;
 }
 
 //////////////////////////////////////////////////
@@ -57,9 +57,7 @@ constexpr double dist_corner(double y, double x) {
 // CONSTEXPR LUT GENERATION FUNCTIONS			//
 //////////////////////////////////////////////////
 constexpr lut::array_2D generate_distctr() {
-
-	lut::array_2D arr {};	
-	
+	lut::array_2D arr {};
 	double mapMax = dist_center(0, 0, CENTER_Y, CENTER_X);
 	for(int y = 0; y < NY; y++) {
 		for(int x = 0; x < NX; x++) {
@@ -69,12 +67,13 @@ constexpr lut::array_2D generate_distctr() {
 	return arr;
 }
 
-constexpr lut::array_4D generate_distqctr() {	
-
+constexpr lut::array_4D generate_distqctr() {
 	lut::array_4D arr {};
-		
-	double centerQ[2] = { (4.0*NY-1.0)/2.0, (4.0*NX-1.0)/2.0 };
-	double mapMax = dist_center(0, 0, centerQ[0], centerQ[1]);	
+	double centerQ[2] = { 
+		(4.0 * NY - 1.0) / 2.0, 
+		(4.0 * NX - 1.0) / 2.0 
+	};
+	double mapMax = dist_center(0, 0, centerQ[0], centerQ[1]);
 	for(int y = 0; y < (NY*4); y++) {
 		for(int x = 0; x < (NX*4); x++) {
 			arr[y*(NX*4) + x] = dist_center(y, x, centerQ[0], centerQ[1]) * (255.0/mapMax);
@@ -84,10 +83,9 @@ constexpr lut::array_4D generate_distqctr() {
 }
 
 constexpr lut::array_2D generate_invdistctr(lut::array_2D distctr) {
-
 	lut::array_2D arr {};
-	for(int y = 0; y < NY; ++y) {
-		for(int x = 0; x < NX; ++x) {
+	for(int y = 0; y < NY; y++) {
+		for(int x = 0; x < NX; x++) {
 			arr[y*NX + x] = 255.0 - distctr[y*NX + x];
 		}
 	}
@@ -95,7 +93,6 @@ constexpr lut::array_2D generate_invdistctr(lut::array_2D distctr) {
 }
 
 constexpr lut::array_3D generate_distcorners() {
-
 	lut::array_3D arr {};
 	double mapMax = std::floor(dist_corner(NY,NX));
 	for(int y = 0; y < NY; y++) {
