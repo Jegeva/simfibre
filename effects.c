@@ -1,5 +1,5 @@
 #include "effects.h"
-#include "maps.h"
+#include "constexpr.hpp"
 
 uint16_t recthues[LEDNUMX*LEDNUMY];
 uint16_t rectsat[LEDNUMX*LEDNUMY];
@@ -46,15 +46,15 @@ void flipAltLines(){
   for(int i=0;i<(LEDNUMX/2);i++){
     for(int j=0;j<LEDNUMY;j++){
       if((j&1)){
-	th                           = recthues[i+LEDNUMX*j];
-	recthues[i+LEDNUMX*j]        = recthues[LEDNUMX*(j+1)-(i+1)];
-	recthues[LEDNUMX*(j+1)-(i+1)]= th;
-	th                           = rectval[i+LEDNUMX*j];
-	rectval[i+LEDNUMX*j]         = rectval[LEDNUMX*(j+1)-(i+1)];
-	rectval[LEDNUMX*(j+1)-(i+1)] = th;
-	th                           = rectsat[i+LEDNUMX*j];
-	rectsat[i+LEDNUMX*j]         = rectsat[LEDNUMX*(j+1)-(i+1)];
-	rectsat[LEDNUMX*(j+1)-(i+1)] = th;
+		th                           = recthues[i+LEDNUMX*j];
+		recthues[i+LEDNUMX*j]        = recthues[LEDNUMX*(j+1)-(i+1)];
+		recthues[LEDNUMX*(j+1)-(i+1)]= th;
+		th                           = rectval[i+LEDNUMX*j];
+		rectval[i+LEDNUMX*j]         = rectval[LEDNUMX*(j+1)-(i+1)];
+		rectval[LEDNUMX*(j+1)-(i+1)] = th;
+		th                           = rectsat[i+LEDNUMX*j];
+		rectsat[i+LEDNUMX*j]         = rectsat[LEDNUMX*(j+1)-(i+1)];
+		rectsat[LEDNUMX*(j+1)-(i+1)] = th;
       }
     }
   }
@@ -91,7 +91,7 @@ static inline void deltahueall(unsigned int d){
   for(int i=0;i<LEDNUMX;i++){
     for(int j=0;j<LEDNUMY;j++){
       if(recthues[i+LEDNUMX*j] > HSV_HUE_MAX){
-	recthues[i+LEDNUMX*j]-=HSV_HUE_MAX;
+		recthues[i+LEDNUMX*j]-=HSV_HUE_MAX;
       }
     }
   }  
@@ -132,38 +132,42 @@ static inline void randall(){
 }
 
 static inline void randblackPox(uint8_t prob){
-  for(int i=1;i<(LEDNUMX-1);i++){
-    for(int j=1;j<(LEDNUMY-1);j++){
+  for(int i = 1; i < (LEDNUMX-1); i++){
+    for(int j = 1; j < (LEDNUMY-1); j++){
       if((xorshift32()& 0xff) < prob){
-	rectval[i+LEDNUMX*j]=0;
-	rectval[i+LEDNUMX*j]=0;
-	rectval[(i-1)+LEDNUMX*j] >>=1;
-	rectval[(i+1)+LEDNUMX*j] >>=1;
-	rectval[i+LEDNUMX*(j+1)] >>=1;
-	rectval[i+LEDNUMX*(j-1)] >>=1;
-	rectval[(i-1)+LEDNUMX*(j-1)]=  (rectval[(i-1)+LEDNUMX*(j-1)]>>1) + (rectval[(i-1)+LEDNUMX*(j-1)]>>2) ;
-	rectval[(i+1)+LEDNUMX*(j+1)]=  (rectval[(i+1)+LEDNUMX*(j+1)]>>1) + (rectval[(i+1)+LEDNUMX*(j+1)]>>2) ;
-	rectval[(i-1)+LEDNUMX*(j+1)]=  (rectval[(i-1)+LEDNUMX*(j+1)]>>1) + (rectval[(i-1)+LEDNUMX*(j+1)]>>2) ;
-	rectval[(i+1)+LEDNUMX*(j-1)]=  (rectval[(i+1)+LEDNUMX*(j-1)]>>1) + (rectval[(i+1)+LEDNUMX*(j-1)]>>2) ;		 
+        rectval[ i    + LEDNUMX *  j   ]   = 0;
+        rectval[ i    + LEDNUMX *  j   ]   = 0;
+        rectval[(i-1) + LEDNUMX *  j   ] >>= 1;
+        rectval[(i+1) + LEDNUMX *  j   ] >>= 1;
+        rectval[ i    + LEDNUMX * (j+1)] >>= 1;
+        rectval[ i    + LEDNUMX * (j-1)] >>= 1;
+        rectval[(i-1) + LEDNUMX * (j-1)]   = (rectval[(i-1)+LEDNUMX*(j-1)]>>1) + 
+									         (rectval[(i-1)+LEDNUMX*(j-1)]>>2);
+        rectval[(i+1) + LEDNUMX * (j+1)]   = (rectval[(i+1)+LEDNUMX*(j+1)]>>1) + 
+									         (rectval[(i+1)+LEDNUMX*(j+1)]>>2);
+        rectval[(i-1) + LEDNUMX * (j+1)]   = (rectval[(i-1)+LEDNUMX*(j+1)]>>1) + 
+									         (rectval[(i-1)+LEDNUMX*(j+1)]>>2);
+        rectval[(i+1) + LEDNUMX * (j-1)]   = (rectval[(i+1)+LEDNUMX*(j-1)]>>1) + 
+									         (rectval[(i+1)+LEDNUMX*(j-1)]>>2);		 
       }
     }
   }
 }
 
 static inline void randwhitePox(uint8_t prob){
-  for(int i=1;i<(LEDNUMX-1);i++){
-    for(int j=1;j<(LEDNUMY-1);j++){
-      if((xorshift32()& 0xff) < prob){
-	rectval[i+LEDNUMX*j]=0;
-	rectval[i+LEDNUMX*j]=255;
-	rectval[(i-1)+LEDNUMX*j] =196;
-	rectval[(i+1)+LEDNUMX*j] =196;
-	rectval[i+LEDNUMX*(j+1)] =196;
-	rectval[i+LEDNUMX*(j-1)] =196;
-	rectval[(i-1)+LEDNUMX*(j-1)]= 128;
-	rectval[(i+1)+LEDNUMX*(j+1)]= 128;
-	rectval[(i-1)+LEDNUMX*(j+1)]= 128;
-	rectval[(i+1)+LEDNUMX*(j-1)]= 128;
+  for(int i = 1; i < (LEDNUMX-1); i++){
+    for(int j = 1;j < (LEDNUMY-1); j++){
+      if((xorshift32()& 0xff) < prob) {
+        rectval[ i    + LEDNUMX *  j   ] = 0;
+        rectval[ i    + LEDNUMX *  j   ] = 255;
+        rectval[(i-1) + LEDNUMX *  j   ] = 196;
+        rectval[(i+1) + LEDNUMX *  j   ] = 196;
+        rectval[ i    + LEDNUMX * (j+1)] = 196;
+        rectval[ i    + LEDNUMX * (j-1)] = 196;
+        rectval[(i-1) + LEDNUMX * (j-1)] = 128;
+        rectval[(i+1) + LEDNUMX * (j+1)] = 128;
+        rectval[(i-1) + LEDNUMX * (j+1)] = 128;
+        rectval[(i+1) + LEDNUMX * (j-1)] = 128;
       }
     }
   }
@@ -201,10 +205,10 @@ void effect2(){
   cpypix((LEDNUMX*LEDNUMY)/2+LEDNUMX/2-LEDNUMX    ,(LEDNUMX*LEDNUMY)/2+LEDNUMX/2 );
   for(int i=1;i<LEDNUMX/2;i++){
     for(int j=1;j<LEDNUMY/2;j++){
-      cpypix( (i-1)+LEDNUMX*(j-1) , (i)+LEDNUMX*(j));
-      cpypix( LEDNUMX*(j)-i , LEDNUMX*(j+1)-(i+1));
-      cpypix( (LEDNUMX*LEDNUMY-1)-((i-1)+LEDNUMX*(j-1)) , (LEDNUMX*LEDNUMY-1)-((i)+LEDNUMX*(j)));
-      cpypix( (LEDNUMX*LEDNUMY-1)-(LEDNUMX*(j)-i) , (LEDNUMX*LEDNUMY-1)-(LEDNUMX*(j+1)-(i+1)));
+      cpypix((i-1)+LEDNUMX*(j-1) , (i)+LEDNUMX*(j));
+      cpypix(LEDNUMX*(j)-i , LEDNUMX*(j+1)-(i+1));
+      cpypix((LEDNUMX*LEDNUMY-1)-((i-1)+LEDNUMX*(j-1)) , (LEDNUMX*LEDNUMY-1)-((i)+LEDNUMX*(j)));
+      cpypix((LEDNUMX*LEDNUMY-1)-(LEDNUMX*(j)-i) , (LEDNUMX*LEDNUMY-1)-(LEDNUMX*(j+1)-(i+1)));
     }
   }
 }
@@ -246,8 +250,9 @@ void effect7(){
   
 }
 void effect8(){
-  if(justswitchedeffect)
+  if(justswitchedeffect){
     randwhitePox(16);
+  }
   effect5();
 }
 
@@ -264,7 +269,7 @@ void plotline(int8_t x0,int8_t y0,int8_t x1,int8_t y1,uint16_t h,uint8_t dofade)
   uint8_t coords[10][2];
   int8_t dirX = (x0<x1)?1:-1;
   int8_t dirY = (y0<y1)?1:-1;  
-  int8_t dx = ((x1-x0) < 0 ?  -(x1-x0) : (x1-x0)) ;
+  int8_t dx = ((x1-x0) < 0 ? -(x1-x0) :  (x1-x0)) ;
   int8_t dy = ((y1-y0) < 0 ?  (y1-y0) : -(y1-y0)) ;
   int16_t e  = dy+dx;
   int8_t e2 = 0;
@@ -283,7 +288,7 @@ void plotline(int8_t x0,int8_t y0,int8_t x1,int8_t y1,uint16_t h,uint8_t dofade)
     }
     if(e2<=dx){
       if(y0==y1){
-	break;
+	    break;
       }
       e = e+dx;
       y0+= dirY;
@@ -347,20 +352,20 @@ void effectTracer(){
       dx = TracerPos[i][0]+TracerVel2DVec[i][0];
       dy = TracerPos[i][1]+TracerVel2DVec[i][1];
       if(dx<0){
-	dx=0;
-	TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
+        dx=0;
+        TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
       }
       if(dx>=LEDNUMX-1){
-	dx=LEDNUMX-1;
-	TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
+		dx=LEDNUMX-1;
+		TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
       }
       if(dy<0){
-	dy=0;
-	TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
+		dy=0;
+		TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
       }
       if(dy>=LEDNUMY-1){
-	dy=LEDNUMY-1;
-	TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
+		dy=LEDNUMY-1;
+		TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
       }
       plotline(TracerPos[i][0],TracerPos[i][1],dx,dy,TracerPos[i][2],1);
       TracerPos[i][0]=dx;
@@ -388,20 +393,20 @@ void effectTracer2(){
       dx = TracerPos[i][0]+TracerVel2DVec[i][0];
       dy = TracerPos[i][1]+TracerVel2DVec[i][1];
       if(dx<0){
-	dx=0;
-	TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
+		dx=0;
+		TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
       }
       if(dx>=LEDNUMX-1){
-	dx=LEDNUMX-1;
-	TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
+		dx=LEDNUMX-1;
+		TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
       }
       if(dy<0){
-	dy=0;
-	TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
+		dy=0;
+		TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
       }
       if(dy>=LEDNUMY-1){
-	dy=LEDNUMY-1;
-	TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
+		dy=LEDNUMY-1;
+		TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
       }
       plotline(TracerPos[i][0],TracerPos[i][1],dx,dy,tracerhue,1);
       TracerPos[i][0]=dx;
@@ -430,20 +435,20 @@ void effectTracer3(){
       dx = TracerPos[i][0]+TracerVel2DVec[i][0];
       dy = TracerPos[i][1]+TracerVel2DVec[i][1];
       if(dx<0){
-	dx=0;
-	TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
+		dx=0;
+		TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
       }
       if(dx>=LEDNUMX-1){
-	dx=LEDNUMX-1;
-	TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
+		dx=LEDNUMX-1;
+		TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
       }
       if(dy<0){
-	dy=0;
-	TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
+		dy=0;
+		TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
       }
       if(dy>=LEDNUMY-1){
-	dy=LEDNUMY-1;
-	TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
+		dy=LEDNUMY-1;
+		TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
       }
       plotline(TracerPos[i][0],TracerPos[i][1],dx,dy,TracerPos[i][2] ,1);
       TracerPos[i][0]=dx;
@@ -474,16 +479,16 @@ void effectTracer4(){
 	TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
       }
       if(dx>=LEDNUMX-1){
-	dx=LEDNUMX-1;
-	TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
+		dx=LEDNUMX-1;
+		TracerVel2DVec[i][0]=-TracerVel2DVec[i][0];
       }
       if(dy<0){
-	dy=0;
-	TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
+		dy=0;
+		TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
       }
       if(dy>=LEDNUMY-1){
-	dy=LEDNUMY-1;
-	TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
+		dy=LEDNUMY-1;
+		TracerVel2DVec[i][1]=-TracerVel2DVec[i][1];
       }
       plotline(TracerPos[i][0],TracerPos[i][1],dx,dy,tracerhue,1);
       TracerPos[i][0]=dx;
@@ -523,7 +528,11 @@ void effectTracer5(){
       recthues[i] = rectval[i] = 0;
     }
     for(int i=0;i<TracerNr;i++){
-      plotline(TracerPos[i][0],TracerPos[i][1],TracerPos[(i+1)%TracerNr][0],TracerPos[(i+1)%TracerNr][1],tracerhue,0);    
+      plotline(TracerPos[i][0],
+			   TracerPos[i][1],
+			   TracerPos[(i+1)%TracerNr][0],
+			   TracerPos[(i+1)%TracerNr][1],
+			   tracerhue,0);   
     }
     TracerPos[0][0]-=tracer5Dir;
     TracerPos[0][1]-=tracer5Dir;
@@ -571,7 +580,11 @@ void effectTracer6(){
       recthues[i] = rectval[i] = 0;
     }
     for(int i=0;i<TracerNr;i++){
-      plotline(TracerPos[i][0],TracerPos[i][1],TracerPos[(i+1)%TracerNr][0],TracerPos[(i+1)%TracerNr][1],tracerhue,0);    
+      plotline(TracerPos[i][0],
+			   TracerPos[i][1],
+			   TracerPos[(i+1)%TracerNr][0],
+			   TracerPos[(i+1)%TracerNr][1],
+			   tracerhue,0);
     }
     if(((TracerPos[0][0]) <= 0) || ((TracerPos[0][0]) > ((LEDNUMX/2)-1))){
       tracer5Dir = -tracer5Dir;    
@@ -621,7 +634,11 @@ void effectTracer7(){
       recthues[i] = rectval[i] = 0;
     }
     for(int i=0;i<TracerNr;i++){
-      plotline(TracerPos[i][0],TracerPos[i][1],TracerPos[(i+1)%TracerNr][0],TracerPos[(i+1)%TracerNr][1],tracerhue,0);    
+      plotline(TracerPos[i][0],
+			   TracerPos[i][1],
+			   TracerPos[(i+1)%TracerNr][0],
+			   TracerPos[(i+1)%TracerNr][1],
+			   tracerhue,0);    
     }
     plotline(TracerPos[0][0],TracerPos[0][1],TracerPos[2][0],TracerPos[2][1],tracerhue,0);
     plotline(TracerPos[1][0],TracerPos[1][1],TracerPos[3][0],TracerPos[3][1],tracerhue,0);
@@ -668,7 +685,11 @@ void effectTracer8(){
   } 
   if((t%20)==0){
     for(int i=0;i<TracerNr;i++){
-      plotline(TracerPos[i][0],TracerPos[i][1],TracerPos[(i+1)%TracerNr][0],TracerPos[(i+1)%TracerNr][1],tracerhue,0);    
+      plotline(TracerPos[i][0],
+			   TracerPos[i][1],
+			   TracerPos[(i+1)%TracerNr][0],
+			   TracerPos[(i+1)%TracerNr][1],
+			   tracerhue,0);    
     }
     plotline(TracerPos[0][0],TracerPos[0][1],TracerPos[2][0],TracerPos[2][1],tracerhue,0);
     plotline(TracerPos[1][0],TracerPos[1][1],TracerPos[3][0],TracerPos[3][1],tracerhue,0);
@@ -754,8 +775,7 @@ uint8_t Map7stridejdir = 1;
 void effectMap7(){
   for(int i=0;i<(LEDNUMX);i++){
     for(int j=0;j<(LEDNUMY);j++){
-      rectval[(i)+LEDNUMX*(j)] = distQuadctr[ (LEDNUMX*4)*(j+2*Map7stridej)  +(i+2*Map7stridei)];
-     
+      rectval[(i)+LEDNUMX*(j)] = distQuadctr[ (LEDNUMX*4)*(j+2*Map7stridej)  +(i+2*Map7stridei)];     
     }
   }
   //printf("%d\n",(LEDNUMX*4)*(LEDNUMY+2*Map7stridej)  +(LEDNUMX+2*Map7stridei));
